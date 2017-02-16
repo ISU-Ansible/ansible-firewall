@@ -1,0 +1,55 @@
+---
+- name: Install firewalld
+  tags:
+    - configuration
+    - security
+    - firewalld
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - "{{ firewalld_packages }}"
+
+- name: Start firewalld
+  tags:
+    - configuration
+    - security
+    - firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Set the firewalld default zone
+  tags:
+    - configuration
+    - security
+    - firewalld
+  lineinfile:
+    dest: /etc/firewalld/firewalld.conf
+    regexp: "^DefaultZone"
+    line: "DefaultZone={{ firewalld_default_zone }}"
+  notify:
+    - Restart firewalld
+
+- name: Configure firewalld
+  tags:
+    - configuration
+    - security
+    - firewalld
+  firewalld:
+    immediate: "{{ item.immediate | default(omit) }}"
+    permanent: "{{ item.permanent | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    rich_rule: "{{ item.rich_rule | default(omit) }}"
+    service: "{{ item.service | default(omit) }}"
+    source: "{{ item.source | default(omit) }}"
+    state: "{{ item.state | default(\"enabled\") }}"
+    timeout: "{{ item.timeout | default(omit) }}"
+    zone: "{{ item.zone | default(omit) }}"
+  with_flattened:
+    - "{{ firewalld_default_rules }}"
+    - "{{ firewalld_rules }}"
+    - "{{ firewalld_rules_extra }}"
+  notify:
+    - Restart firewalld

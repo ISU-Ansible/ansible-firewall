@@ -1,0 +1,156 @@
+---
+#=====
+# Firewalld or IPTables
+#=====
+configure_firewalld: false
+configure_iptables: false
+
+#=====
+# IPTables examples and basic rules
+#=====
+
+# This rule forwards port 80 to port 8080
+# iptables_rules:
+#
+#   - table: nat
+#     chain: PREROUTING
+#     in_interface: {{ ansible_default_ipv4.alias }}
+#     protocol: tcp
+#     match: tcp
+#     destination_port: 80
+#     jump: REDIRECT
+#     to_ports: 8080
+#     comment: "Redirect port 80 to 8080"
+#
+# This rule accepts all established and related connections and is extremely
+#  useful for decreasing the amount of time network connections are filtered.
+#  Note that the ctstate variable expects a list of states.
+#
+# iptables_rules:
+#
+#   - chain: INPUT
+#     ctstate:
+#       - ESTABLISHED
+#       - RELATED
+#     jump: ACCEPT
+#
+# These rules accept SSH connections from 129.186/16 and 10.0/8
+#
+# iptables_rules:
+#
+#   - chain: INPUT
+#     ctstate:
+#       - NEW
+#     protocol: tcp
+#     source: '10.0.0.0/8'
+#     table: filter
+#     destination_port: '22'
+#     jump: ACCEPT
+#
+#   - chain: INPUT
+#     ctstate:
+#       - NEW
+#     protocol: tcp
+#     source: '129.186.0.0/16'
+#     table: filter
+#     destination_port: '22'
+#     jump: ACCEPT
+#
+#
+
+iptables_save_rules: true
+
+iptables_default_rules:
+
+  - chain: INPUT
+    ctstate:
+      - ESTABLISHED
+      - RELATED
+    jump: ACCEPT
+    state: present
+
+  - chain: INPUT
+    protocol: icmp
+    jump: DROP
+
+  - chain: INPUT
+    in_interface: 'lo'
+    jump: ACCEPT
+
+  - chain: INPUT
+    ctstate:
+      - NEW
+    protocol: tcp
+    source: '10.0.0.0/8'
+    table: filter
+    destination_port: '22'
+    jump: ACCEPT
+
+  - chain: INPUT
+    ctstate:
+      - NEW
+    protocol: tcp
+    source: '129.186.0.0/16'
+    table: filter
+    destination_port: '22'
+    jump: ACCEPT
+
+  - chain: INPUT
+    jump: DROP
+
+  - chain: FORWARD
+    jump: DROP
+
+iptables_rules: []
+
+iptables_rules_extra: []
+
+
+#=====
+# Firewalld basic info
+#=====
+
+firewalld_packages:
+  - firewalld
+# This setup allows ssh from 10.0.0.0/8 and 129.186.0.0/16 but nowhere else
+# firewalld_rules:
+#   - zone: work
+#     source: 10.0.0.0/8
+#     state: enabled
+#     permanent: yes
+#   - zone: work
+#     source: 129.186.0.0/16
+#     state: enabled
+#     permanent: yes
+#   - zone: work
+#     service: ssh
+#     state: enabled
+#     permanent: yes
+
+firewalld_default_zone: public
+
+firewalld_default_rules:
+
+  - zone: public
+    service: ssh
+    state: disabled
+    permanent: yes
+
+  - zone: work
+    source: '129.186.0.0/16'
+    state: enabled
+    permanent: yes
+
+  - zone: work
+    source: '10.0.0.0/8'
+    state: enabled
+    permanent: yes
+
+  - zone: work
+    service: ssh
+    permanent: yes
+    state: enabled
+
+firewalld_rules: []
+
+firewalld_rules_extra: []

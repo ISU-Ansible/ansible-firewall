@@ -1,0 +1,47 @@
+---
+
+- name: Install IPTables rules
+  tags:
+    - configuration
+    - security
+    - iptables
+  iptables:
+    chain: "{{ item.chain | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+    ctstate: "{{ item.ctstate | default(omit) }}"
+    destination: "{{ item.destination | default(omit) }}"
+    destination_port: "{{ item.destination_port | default(omit) }}"
+    fragment: "{{ item.fragment | default(omit) }}"
+    goto: "{{ item.goto | default(omit) }}"
+    in_interface: "{{ item.in_interface | default(omit) }}"
+    ip_version: "{{ item.ip_version | default(omit) }}"
+    jump: "{{ item.jump | default(omit) }}"
+    limit: "{{ item.limit | default(omit) }}"
+    limit_burst: "{{ item.limit_burst | default(omit) }}"
+    match: "{{ item.match | default(omit) }}"
+    out_interface: "{{ item.out_interface | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    reject_with: "{{ item.reject_with | default(omit) }}"
+    set_counters: "{{ item.set_counters | default(omit) }}"
+    source: "{{ item.source | default(omit) }}"
+    source_port: "{{ item.source_port | default(omit) }}"
+    state: "{{ item.state | default(\"present\") }}"
+    table: "{{ item.table | default(omit) }}"
+    to_ports: "{{ item.to_ports | default(omit) }}"
+  with_flattened:
+    - "{{ iptables_default_rules }}"
+    - "{{ iptables_rules }}"
+    - "{{ iptables_rules_extra }}"
+  notify:
+    - Save iptables
+    - Restart iptables
+
+- name: Enable IP Tables
+  tags:
+     - services
+     - security
+     - iptables
+  service:
+    name: iptables
+    enabled: yes
+    state: started

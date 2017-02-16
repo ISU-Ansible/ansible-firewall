@@ -1,0 +1,25 @@
+---
+- name: Save iptables
+  tags:
+    - services
+    - security
+    - iptables
+  command: service iptables save
+
+- name: Restart iptables
+  tags:
+    - services
+    - security
+    - iptables
+  service:
+    name: iptables
+    state: restarted
+
+- name: Restart firewalld
+  tags:
+    - services
+    - security
+    - firewalld
+  service:
+    name: firewalld
+    state: restarted
