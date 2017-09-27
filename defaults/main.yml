@@ -128,7 +128,10 @@ firewalld_zone_source:
 
 firewalld_service_rules:
   ssh:
-    zone: work
+  - zone: public
+    state: disabled
+  - zone: work
+    state: enabled
 
 firewalld_port_rules: {}
 firewalld_rich_rules: {}
