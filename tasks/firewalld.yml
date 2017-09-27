@@ -16,8 +16,8 @@
   command: "/bin/firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
   register: result
   changed_when: 
-    - result.stdout == "success"
-    - 'ZONE_ALREADY_SET' not in result.stderr 
+    - "'success' in result.stdout"
+    - "'ZONE_ALREADY_SET' not in result.stderr"
   notify:
     - Restart firewalld
 
