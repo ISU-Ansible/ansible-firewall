@@ -22,7 +22,7 @@
 - name: FIREWALLD | debug configuration commands
   debug:
     var: result
-  when: firewalld_debug is true
+  when: firewalld_debug
 
 - name: FIREWALLD | Set Zone Interfaces
   command: "/bin/firewall-cmd --zone={{ item.zone }} --change-interface={{ item.interface }} --permanent"
