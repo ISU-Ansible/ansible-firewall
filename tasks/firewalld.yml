@@ -28,7 +28,13 @@
 
 - name: FIREWALLD | Set Zone Interfaces
   command: "/bin/firewall-cmd --zone={{ item.zone }} --change-interface={{ item.interface }} --permanent"
+  register: result
+  changed_when:
+    - "'success' in result.stdout"
+    - "'already bound to' not in result.stderr"
   with_items: "{{ firewalld_zone_interface | default([]) }}"
+  notify:
+    - Restart firewalld
 
 - name: FIREWALLD | Set Zone Sources
   firewalld:
@@ -38,6 +44,8 @@
     permanent: "{{ item.permanent | default('true') }}" 
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_zone_source | default([]) }}"
+  notify:
+    - Restart firewalld
 
 - name: FIREWALLD | Set Service Rules
   firewalld: 
@@ -47,6 +55,8 @@
     permanent: "{{ item.permanent | default('true') }}" 
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_service_rules | default([]) }}"
+  notify:
+    - Restart firewalld
 
 - name: FIREWALLD | Set Port Rules
   firewalld: 
@@ -56,6 +66,8 @@
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_port_rules | default([]) }}"
+  notify:
+    - Restart firewalld
 
 - name: FIREWALLD | Set Rich Rules
   firewalld: 
@@ -65,3 +77,5 @@
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_rich_rules | default([]) }}"
+  notify:
+    - Restart firewalld
