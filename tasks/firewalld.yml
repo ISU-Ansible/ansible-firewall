@@ -25,17 +25,17 @@
 - name: FIREWALLD | Set Zone Interfaces
   tags: [ 'configuration', 'security', 'firewalld' ]
   command: "/bin/firewall-cmd --zone={{ item.zone }} --change-interface={{ item.interface }} --permanent"
-  with_items: "{{ firewalld_zone_interface | default({}) }}"
+  with_items: "{{ firewalld_zone_interface | default([]) }}"
 
 - name: FIREWALLD | Set Zone Sources
   tags: [ 'configuration', 'security', 'firewalld' ]
   firewalld:
-    zone: "{{ item.key }}" 
-    source: "{{ item.value.source }}"
-    state: "{{ item.value.state | default('enabled') }} "
+    zone: "{{ item.zone }}" 
+    source: "{{ item.source }}"
+    state: "{{ item.state | default('enabled') }} "
     permanent: "{{ item.permanent | default('true') }}" 
     immediate: "{{ item.immediate | default('true') }}"
-  with_items: "{{ firewalld_zone_source | default({}) }}"
+  with_items: "{{ firewalld_zone_source | default([]) }}"
 
 - name: FIREWALLD | Set Service Rules
   tags: [ 'configuration', 'security', 'firewalld' ]
@@ -45,7 +45,7 @@
     state: "{{ item.state | default('enabled') }}" 
     permanent: "{{ item.permanent | default('true') }}" 
     immediate: "{{ item.immediate | default('true') }}"
-  with_items: "{{ firewalld_service_rules | default({}) }}"
+  with_items: "{{ firewalld_service_rules | default([]) }}"
 
 - name: FIREWALLD | Set Port Rules
   tags: [ 'configuration', 'security', 'firewalld' ]
@@ -55,7 +55,7 @@
     state: "{{ item.state | default('enabled') }}"
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
-  with_items: "{{ firewalld_port_rules | default({}) }}"
+  with_items: "{{ firewalld_port_rules | default([]) }}"
 
 - name: FIREWALLD | Set Rich Rules
   tags: [ 'configuration', 'security', 'firewalld' ]
@@ -65,4 +65,4 @@
     state: "{{ item.state | default('enabled') }}"
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
-  with_items: "{{ firewalld_rich_rules | default({}) }}"
+  with_items: "{{ firewalld_rich_rules | default([]) }}"
