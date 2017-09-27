@@ -1,55 +1,68 @@
 ---
-- name: Install firewalld
-  tags:
-    - configuration
-    - security
-    - firewalld
+- name: FIREWALLD | Install firewalld
+  tags: [ 'configuration', 'security', 'firewalld' ]
   yum:
     name: "{{ item }}"
-    state: installed
+    state: present
   with_items:
     - "{{ firewalld_packages }}"
 
-- name: Start firewalld
-  tags:
-    - configuration
-    - security
-    - firewalld
+- name: FIREWALLD | Start firewalld
+  tags: [ 'configuration', 'security', 'firewalld' ]
   service:
     name: firewalld
     state: started
     enabled: yes
 
-- name: Set the firewalld default zone
-  tags:
-    - configuration
-    - security
-    - firewalld
-  lineinfile:
-    dest: /etc/firewalld/firewalld.conf
-    regexp: "^DefaultZone"
-    line: "DefaultZone={{ firewalld_default_zone }}"
+- name: FIREWALLD | Set Default Zone
+  tags: [ 'configuration', 'security', 'firewalld' ]
+  command: "/bin/firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
+  register: result
+  changed_when: result.stdout == "success"
   notify:
     - Restart firewalld
 
-- name: Configure firewalld
-  tags:
-    - configuration
-    - security
-    - firewalld
+- name: FIREWALLD | Set Zone Interface
+  tags: [ 'configuration', 'security', 'firewalld' ]
+  command: "/bin/firewall-cmd --zone={{ item.key }} --change-interface={{ item.value }} --permanent"
+  with_dict: "{{ firewalld_zone_interface | default({}) }}"
+
+- name: FIREWALLD | Set Zone Source
+  tags: [ 'configuration', 'security', 'firewalld' ]
   firewalld:
-    immediate: "{{ item.immediate | default(omit) }}"
-    permanent: "{{ item.permanent | default(omit) }}"
-    port: "{{ item.port | default(omit) }}"
-    rich_rule: "{{ item.rich_rule | default(omit) }}"
-    service: "{{ item.service | default(omit) }}"
-    source: "{{ item.source | default(omit) }}"
-    state: "{{ item.state | default(\"enabled\") }}"
-    timeout: "{{ item.timeout | default(omit) }}"
-    zone: "{{ item.zone | default(omit) }}"
-  with_flattened:
-    - "{{ firewalld_default_rules }}"
-    - "{{ firewalld_rules }}"
-    - "{{ firewalld_rules_extra }}"
-  notify:
-    - Restart firewalld
+    zone: "{{ item.key }}" 
+    source: "{{ item.value.source | join(' ') }}"
+    state: "{{ item.value.state | default('enabled') }} "
+    permanent: "{{ item.value.permanent | default('true') }}" 
+    immediate: "{{ item.value.immediate | default('true') }}"
+  with_dict: "{{ firewalld_zone_source | default({}) }}"
+
+- name: FIREWALLD | Set Service Rules
+  tags: [ 'configuration', 'security', 'firewalld' ]
+  firewalld: 
+    zone: "{{ item.value.zone | default('public') }}"
+    service: "{{ item.key }}" 
+    state: "{{ item.value.state | default('enabled') }}" 
+    permanent: "{{ item.value.permanent | default('true') }}" 
+    immediate: "{{ item.value.immediate | default('true') }}"
+  with_dict: "{{ firewalld_service_rules | default({}) }}"
+
+- name: FIREWALLD | Set Port Rules
+  tags: [ 'configuration', 'security', 'firewalld' ]
+  firewalld: 
+    zone: "{{ item.value.zone | default('public') }}"
+    port: "{{ item.value.port }}/{{ item.value.protocol | default('tcp') }}"
+    state: "{{ item.value.state | default('enabled') }}"
+    permanent: "{{ item.value.permanent | default('true') }}"
+    immediate: "{{ item.value.immediate | default('true') }}"
+  with_dict: "{{ firewalld_port_rules | default({}) }}"
+
+- name: FIREWALLD | Set Rich Rules
+  tags: [ 'configuration', 'security', 'firewalld' ]
+  firewalld: 
+    zone: "{{ item.value.zone | default('public') }}"
+    rich_rule: "{{ item.value.rule }}" 
+    state: "{{ item.value.state | default('enabled') }}"
+    permanent: "{{ item.value.permanent | default('true') }}"
+    immediate: "{{ item.value.immediate | default('true') }}"
+  with_dict: "{{ firewalld_rich_rules | default({}) }}"
