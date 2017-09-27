@@ -60,49 +60,8 @@ configure_iptables: false
 
 iptables_save_rules: true
 
-iptables_default_rules:
-
-  - chain: INPUT
-    ctstate:
-      - ESTABLISHED
-      - RELATED
-    jump: ACCEPT
-    state: present
-
-  - chain: INPUT
-    protocol: icmp
-    jump: DROP
-
-  - chain: INPUT
-    in_interface: 'lo'
-    jump: ACCEPT
-
-  - chain: INPUT
-    ctstate:
-      - NEW
-    protocol: tcp
-    source: '10.0.0.0/8'
-    table: filter
-    destination_port: '22'
-    jump: ACCEPT
-
-  - chain: INPUT
-    ctstate:
-      - NEW
-    protocol: tcp
-    source: '129.186.0.0/16'
-    table: filter
-    destination_port: '22'
-    jump: ACCEPT
-
-  - chain: INPUT
-    jump: DROP
-
-  - chain: FORWARD
-    jump: DROP
-
+iptables_default_rules: []
 iptables_rules: []
-
 iptables_rules_extra: []
 
 
@@ -112,44 +71,15 @@ iptables_rules_extra: []
 
 firewalld_packages:
   - firewalld
-
 firewalld_default_zone: public
-
-#
-#firewalld_zone_interface:
-#  public: eth0
-#
-
+firewalld_zone_interface:
+  public: eth0
 firewalld_zone_source:
   work:
-    source: 
-      - "10.0.0.0/8"
-      - "129.186.0.0/16"
-
+    source: 10.0.0.0/8
 firewalld_service_rules:
   ssh:
-  - zone: public
-    state: disabled
-  - zone: work
+    zone: public
     state: enabled
-
 firewalld_port_rules: {}
 firewalld_rich_rules: {}
-
-firewalld_default_rules:
-  - zone: public
-    service: ssh
-    state: disabled
-    permanent: yes
-  - zone: work
-    source: '192.186.0.0/16'
-    state: enabled
-    permanent: yes
-  - zone: work
-    source: '10.0.0.0/8'
-    state: enabled
-    permanent: yes
-  - zone: work
-    service: ssh
-    permanent: yes
-    state: enabled
