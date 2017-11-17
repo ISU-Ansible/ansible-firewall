@@ -1,25 +1,16 @@
 ---
 - name: Save iptables
-  tags:
-    - services
-    - security
-    - iptables
+  tags: [ 'services', 'security', 'firewalld' ]
   command: service iptables save
 
 - name: Restart iptables
-  tags:
-    - services
-    - security
-    - iptables
+  tags: [ 'services', 'security', 'firewalld' ]
   service:
     name: iptables
     state: restarted
 
 - name: Restart firewalld
-  tags:
-    - services
-    - security
-    - firewalld
+  tags: [ 'services', 'security', 'firewalld' ]
   service:
     name: firewalld
     state: restarted

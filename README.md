@@ -4,9 +4,11 @@ Sets up the system firewall, either iptables or firewalld.
 
 **NOTE**: The firewall setup and configuration has been greatly simplified from previous iterations of ISU roles
 
+
 Requirements
 ------------
 As of right now, the only requirements are a system with firewalld or iptables installed.
+
 
 Role Variables
 --------------
@@ -84,6 +86,7 @@ Three variables are provided by this role:
 
 These variables are flattened (concatenated, but not overwritten), so you can create different groups that may modify different iptables rules.
 
+
 Firewalld
 ---------
 By default, the firewalld rules configuration is:
@@ -130,42 +133,45 @@ The variables for configuration provided are:
 
 These variables are flattened (concatenated, but not overwritten), so you can create different groups that may modify different firewalld rules.
 
+
 Tasks
 -----
 This role does the following:
 
-### IPTables
+**For IPTables:**
 1. Starts iptables
 2. Creates iptables rules based on your variable configuration.
 3. Optionally saves your iptables rules
 4. Optionally restarts your iptables
 
-### Firewalld
+**For Firewalld:**
 1. Sets the default firewalld zone.
 2. Creates firewalld rules based on your variable configuration.
 3. Restarts firewalld.
 
+
 Changed Files
 -------------
 - /etc/sysconfig/iptables, or
-- /etc/firewalld*
+- /etc/firewalld/*
+
 
 Installed Programs
 ------------------
 No programs are installed as part of this role
+
 
 Example
 =======
 
 FirewallD
 ---------
-### group_vars/all
+**group_vars/all**
 
     configure_firewalld: true
     firewalld_default_zone: "public"
 
-
-### playbooks/firewall.yml
+**playbooks/firewall.yml**
 
     - name: Firewall Playbook
       hosts: all
@@ -178,13 +184,12 @@ FirewallD
 
 IPTables
 --------
-### group_vars/all
+**group_vars/all**
 
     configure_iptables: true
     iptables_save_rules: true
 
-
-### playbooks/firewall.yml
+**playbooks/firewall.yml**
 
     - name: Firewall Playbook
       hosts: all
