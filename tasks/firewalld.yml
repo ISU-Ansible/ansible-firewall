@@ -29,6 +29,8 @@
   changed_when:
     - "'success' in result_new_zone.stdout"
   ignore_errors: true
+  with_items: "{{ firewalld_zones }}"
+  when: item in firewald_zones_enabled
 
 - name: FIREWALLD | Remove zones
   command: "/bin/firewall-cmd --permanent --delete-zone={{ item }}"
@@ -36,6 +38,9 @@
   changed_when:
     - "'success' in result_new_zone.stdout"
   ignore_errors: true
+  with_items: "{{ firewalld_zones }}"
+  when: item not in firewald_zones_enabled
+
 
 #
 # Set the default zone (including ones we've created)
