@@ -14,3 +14,9 @@
   service:
     name: firewalld
     state: restarted
+
+- name: Reload firewalld
+  tags: [ 'services', 'security', 'firewalld' ]
+  service:
+    name: firewalld
+    state: reloaded

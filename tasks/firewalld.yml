@@ -12,20 +12,45 @@
     state: started
     enabled: yes
 
-- name: FIREWALLD | Set Default Zone
-  command: "/bin/firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
-  register: result
-  changed_when: 
-    - "'success' in result.stdout"
-    - "'ZONE_ALREADY_SET' not in result.stderr"
-  notify:
-    - Restart firewalld
-
+#
+# Debugging for configuration
+#
 - name: FIREWALLD | debug configuration commands
   debug:
     var: result
   when: firewalld_debug is defined and firewalld_debug
 
+#
+# Handle creating and deleting new zones
+#
+- name: FIREWALLD | Add new zones
+  command: "/bin/firewall-cmd --permanent --new-zone={{ item }}"
+  register: result_new_zone
+  changed_when:
+    - "'success' in result_new_zone.stdout"
+  ignore_errors: true
+
+- name: FIREWALLD | Remove zones
+  command: "/bin/firewall-cmd --permanent --delete-zone={{ item }}"
+  register: result_delete_zone
+  changed_when:
+    - "'success' in result_new_zone.stdout"
+  ignore_errors: true
+
+#
+# Set the default zone (including ones we've created)
+#
+- name: FIREWALLD | Set Default Zone
+  command: "/bin/firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
+  register: result_default_zone
+  changed_when:
+    - "'success' in result_default_zone.stdout"
+  notify:
+    - Restart firewalld
+
+#
+# Handle interfaces
+#
 - name: FIREWALLD | Set Zone Interfaces
   command: "/bin/firewall-cmd --zone={{ item.zone }} --change-interface={{ item.interface }} --permanent"
   register: result
@@ -36,30 +61,39 @@
   notify:
     - Restart firewalld
 
+#
+# Handle Zone sources
+#
 - name: FIREWALLD | Set Zone Sources
   firewalld:
-    zone: "{{ item.zone }}" 
+    zone: "{{ item.zone }}"
     source: "{{ item.source }}"
     state: "{{ item.state | default('enabled') }}"
-    permanent: "{{ item.permanent | default('true') }}" 
+    permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_zone_source | default([]) }}"
   notify:
     - Restart firewalld
 
+#
+# Handle services
+#
 - name: FIREWALLD | Set Service Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
-    service: "{{ item.service }}" 
-    state: "{{ item.state | default('enabled') }}" 
-    permanent: "{{ item.permanent | default('true') }}" 
+    service: "{{ item.service }}"
+    state: "{{ item.state | default('enabled') }}"
+    permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_service_rules | default([]) }}"
   notify:
     - Restart firewalld
 
+#
+# Handle ports
+#
 - name: FIREWALLD | Set Port Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
     port: "{{ item.port }}/{{ item.protocol | default('tcp') }}"
     state: "{{ item.state | default('enabled') }}"
@@ -69,10 +103,13 @@
   notify:
     - Restart firewalld
 
+#
+# Handle rich rules
+#
 - name: FIREWALLD | Set Rich Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
-    rich_rule: "{{ item.rule }}" 
+    rich_rule: "{{ item.rule }}"
     state: "{{ item.state | default('enabled') }}"
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
