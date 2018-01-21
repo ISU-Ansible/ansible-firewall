@@ -1,6 +1,6 @@
 ---
 - name: FIREWALLD | Install firewalld
-  yum:
+  package:
     name: "{{ item }}"
     state: present
   with_items:
@@ -15,7 +15,7 @@
 - name: FIREWALLD | Set Default Zone
   command: "/bin/firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
   register: result
-  changed_when: 
+  changed_when:
     - "'success' in result.stdout"
     - "'ZONE_ALREADY_SET' not in result.stderr"
   notify:
@@ -38,28 +38,28 @@
 
 - name: FIREWALLD | Set Zone Sources
   firewalld:
-    zone: "{{ item.zone }}" 
+    zone: "{{ item.zone }}"
     source: "{{ item.source }}"
     state: "{{ item.state | default('enabled') }}"
-    permanent: "{{ item.permanent | default('true') }}" 
+    permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_zone_source | default([]) }}"
   notify:
     - Restart firewalld
 
 - name: FIREWALLD | Set Service Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
-    service: "{{ item.service }}" 
-    state: "{{ item.state | default('enabled') }}" 
-    permanent: "{{ item.permanent | default('true') }}" 
+    service: "{{ item.service }}"
+    state: "{{ item.state | default('enabled') }}"
+    permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_service_rules | default([]) }}"
   notify:
     - Restart firewalld
 
 - name: FIREWALLD | Set Port Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
     port: "{{ item.port }}/{{ item.protocol | default('tcp') }}"
     state: "{{ item.state | default('enabled') }}"
@@ -70,9 +70,9 @@
     - Restart firewalld
 
 - name: FIREWALLD | Set Rich Rules
-  firewalld: 
+  firewalld:
     zone: "{{ item.zone | default('public') }}"
-    rich_rule: "{{ item.rule }}" 
+    rich_rule: "{{ item.rule }}"
     state: "{{ item.state | default('enabled') }}"
     permanent: "{{ item.permanent | default('true') }}"
     immediate: "{{ item.immediate | default('true') }}"
