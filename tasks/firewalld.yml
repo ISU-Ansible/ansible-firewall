@@ -19,7 +19,7 @@
     - "'success' in result.stdout"
     - "'ZONE_ALREADY_SET' not in result.stderr"
   notify:
-    - Restart firewalld
+    - Reload firewalld
 
 - name: FIREWALLD | debug configuration commands
   debug:
@@ -34,7 +34,7 @@
     - "'already bound to' not in result.stderr"
   with_items: "{{ firewalld_zone_interface | default([]) }}"
   notify:
-    - Restart firewalld
+    - Reload firewalld
 
 - name: FIREWALLD | Set Zone Sources
   firewalld:
@@ -45,7 +45,7 @@
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_zone_source | default([]) }}"
   notify:
-    - Restart firewalld
+    - Reload firewalld
 
 - name: FIREWALLD | Set Service Rules
   firewalld:
@@ -56,7 +56,7 @@
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_service_rules | default([]) }}"
   notify:
-    - Restart firewalld
+    - Reload firewalld
 
 - name: FIREWALLD | Set Port Rules
   firewalld:
@@ -67,7 +67,7 @@
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_port_rules | default([]) }}"
   notify:
-    - Restart firewalld
+    - Reload firewalld
 
 - name: FIREWALLD | Set Rich Rules
   firewalld:
@@ -78,4 +78,4 @@
     immediate: "{{ item.immediate | default('true') }}"
   with_items: "{{ firewalld_rich_rules | default([]) }}"
   notify:
-    - Restart firewalld
+    - Reload firewalld
