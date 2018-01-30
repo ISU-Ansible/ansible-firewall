@@ -3,8 +3,6 @@ Firewall
 
 Firewall role
 
-Data Data data data data
-
 
 Default Variables
 -----------------
@@ -94,4 +92,3 @@ Handlers
 ========
 
 Handlers
-
